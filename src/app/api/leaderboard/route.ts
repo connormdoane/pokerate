@@ -7,12 +7,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
     const offset = parseInt(searchParams.get('offset') || '0');
+    const order = searchParams.get('order') || 'desc';
+    const ascending = order === 'asc';
 
     // Fetch Pokemon sorted by Elo
     const { data, error, count } = await supabase
       .from('pokemon')
       .select('id, name, sprite_url, elo, wins, losses', { count: 'exact' })
-      .order('elo', { ascending: false })
+      .order('elo', { ascending })
       .range(offset, offset + limit - 1);
 
     if (error) {
@@ -23,16 +25,18 @@ export async function GET(request: NextRequest) {
     }
 
     // Add rank to each Pokemon
+    const total = count || 0;
     const rankedPokemon = data.map((pokemon, index) => ({
-      rank: offset + index + 1,
+      rank: ascending ? total - offset - index : offset + index + 1,
       ...pokemon,
     }));
 
     return NextResponse.json({
       pokemon: rankedPokemon,
-      total: count || 0,
+      total,
       limit,
       offset,
+      order,
     });
   } catch (error) {
     console.error('Leaderboard error:', error);

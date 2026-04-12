@@ -18,6 +18,7 @@ type LeaderboardData = {
   total: number;
   limit: number;
   offset: number;
+  order: 'asc' | 'desc';
 };
 
 const ITEMS_PER_PAGE = 25;
@@ -26,6 +27,7 @@ export default function LeaderboardTable() {
   const [data, setData] = useState<LeaderboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
+  const [order, setOrder] = useState<'desc' | 'asc'>('desc');
 
   useEffect(() => {
     async function fetchLeaderboard() {
@@ -33,7 +35,7 @@ export default function LeaderboardTable() {
       try {
         const offset = page * ITEMS_PER_PAGE;
         const response = await fetch(
-          `/api/leaderboard?limit=${ITEMS_PER_PAGE}&offset=${offset}`
+          `/api/leaderboard?limit=${ITEMS_PER_PAGE}&offset=${offset}&order=${order}`
         );
         if (response.ok) {
           const json = await response.json();
@@ -47,7 +49,14 @@ export default function LeaderboardTable() {
     }
 
     fetchLeaderboard();
-  }, [page]);
+  }, [page, order]);
+
+  const handleOrderChange = (newOrder: 'desc' | 'asc') => {
+    if (newOrder !== order) {
+      setOrder(newOrder);
+      setPage(0);
+    }
+  };
 
   const totalPages = data ? Math.ceil(data.total / ITEMS_PER_PAGE) : 0;
 
@@ -76,6 +85,30 @@ export default function LeaderboardTable() {
 
   return (
     <div className="w-full">
+      {/* Sort Toggle */}
+      <div className="flex justify-center gap-2 mb-4">
+        <button
+          onClick={() => handleOrderChange('desc')}
+          className={`font-pixel text-[8px] sm:text-[10px] px-3 py-2 border-2 transition-all ${
+            order === 'desc'
+              ? 'bg-gb-light text-gb-darkest border-gb-lightest'
+              : 'bg-gb-dark text-gb-lightest border-gb-dark hover:border-gb-light'
+          }`}
+        >
+          Top Rated
+        </button>
+        <button
+          onClick={() => handleOrderChange('asc')}
+          className={`font-pixel text-[8px] sm:text-[10px] px-3 py-2 border-2 transition-all ${
+            order === 'asc'
+              ? 'bg-gb-light text-gb-darkest border-gb-lightest'
+              : 'bg-gb-dark text-gb-lightest border-gb-dark hover:border-gb-light'
+          }`}
+        >
+          Bottom Rated
+        </button>
+      </div>
+
       {/* Table */}
       <div className="gb-screen overflow-hidden">
         <table className="w-full">
