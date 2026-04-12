@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
+    const supabase = getSupabase();
+
     // Get total count of Pokemon
     const { count, error: countError } = await supabase
       .from('pokemon')
