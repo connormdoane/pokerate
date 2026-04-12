@@ -46,6 +46,12 @@ create policy "Votes are viewable by everyone"
   on votes for select
   using (true);
 
+-- Allow public updates to pokemon (for Elo rating changes)
+create policy "Pokemon elo can be updated"
+  on pokemon for update
+  using (true)
+  with check (true);
+
 -- Function to update pokemon stats after a vote
 create or replace function update_pokemon_after_vote()
 returns trigger as $$
