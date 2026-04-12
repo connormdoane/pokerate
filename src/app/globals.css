@@ -1,26 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Game Boy Color Palette */
+  --gb-lightest: #9bbc0f;
+  --gb-light: #8bac0f;
+  --gb-dark: #306230;
+  --gb-darkest: #0f380f;
+
+  /* Semantic colors */
+  --background: #0f380f;
+  --foreground: #9bbc0f;
+  --card-bg: #306230;
+  --card-border: #9bbc0f;
+  --accent: #8bac0f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-gb-lightest: var(--gb-lightest);
+  --color-gb-light: var(--gb-light);
+  --color-gb-dark: var(--gb-dark);
+  --color-gb-darkest: var(--gb-darkest);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-accent: var(--accent);
+  --font-pixel: 'Press Start 2P', cursive;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+/* Pixel font for headings */
+.font-pixel {
+  font-family: 'Press Start 2P', cursive;
+}
+
+/* Game Boy screen frame effect */
+.gb-screen {
+  background: var(--card-bg);
+  border: 4px solid var(--gb-lightest);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 2px var(--gb-dark),
+    0 4px 0 var(--gb-darkest),
+    0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Game Boy button style */
+.gb-button {
+  background: var(--gb-dark);
+  border: 3px solid var(--gb-lightest);
+  color: var(--gb-lightest);
+  font-family: 'Press Start 2P', cursive;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.1s;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.gb-button:hover {
+  background: var(--gb-light);
+  color: var(--gb-darkest);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--gb-darkest);
+}
+
+.gb-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Pokemon card hover effect */
+.pokemon-card {
+  transition: all 0.15s ease;
+}
+
+.pokemon-card:hover {
+  transform: scale(1.02);
+  box-shadow:
+    0 0 0 4px var(--gb-lightest),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Pixelated image rendering for sprites */
+.pixel-sprite {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Selection cursor animation */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s infinite;
+}
+
+/* Leaderboard rank badges */
+.rank-gold {
+  color: #ffd700;
+  text-shadow: 0 2px 0 #b8860b;
+}
+
+.rank-silver {
+  color: #c0c0c0;
+  text-shadow: 0 2px 0 #808080;
+}
+
+.rank-bronze {
+  color: #cd7f32;
+  text-shadow: 0 2px 0 #8b4513;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gb-darkest);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gb-dark);
+  border: 2px solid var(--gb-darkest);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gb-light);
 }
