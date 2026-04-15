@@ -72,7 +72,7 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
-      <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SettingsDrawer isOpen={isSettingsOpen} />
     </>
   );
 }

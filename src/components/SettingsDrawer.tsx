@@ -5,10 +5,9 @@ import { useGenerationFilterContext } from '@/contexts/GenerationFilterContext';
 
 type SettingsDrawerProps = {
   isOpen: boolean;
-  onClose: () => void;
 };
 
-export default function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
+export default function SettingsDrawer({ isOpen }: SettingsDrawerProps) {
   const { enabledGenerations, toggleGeneration, enableAll, isAllEnabled, isLoaded } =
     useGenerationFilterContext();
 
