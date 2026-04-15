@@ -1,18 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import MatchupCard from './MatchupCard';
+import { useGenerationFilterContext } from '@/contexts/GenerationFilterContext';
 
 type Pokemon = {
   id: number;
   name: string;
   sprite_url: string;
   elo: number;
-};
-
-type EloChange = {
-  winner: number;
-  loser: number;
 };
 
 export default function VoteContainer() {
@@ -25,9 +21,15 @@ export default function VoteContainer() {
     change: number;
   } | null>(null);
 
+  const { enabledGenerations, isLoaded } = useGenerationFilterContext();
+  const prevGensRef = useRef<string>('');
+
   const fetchMatchup = useCallback(async () => {
+    if (!isLoaded) return;
+
     try {
-      const response = await fetch('/api/matchup');
+      const gensParam = enabledGenerations.join(',');
+      const response = await fetch(`/api/matchup?gens=${gensParam}`);
       if (!response.ok) throw new Error('Failed to fetch matchup');
 
       const data = await response.json();
@@ -39,11 +41,24 @@ export default function VoteContainer() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [enabledGenerations, isLoaded]);
 
+  // Fetch on mount and when filter is loaded
   useEffect(() => {
-    fetchMatchup();
-  }, [fetchMatchup]);
+    if (isLoaded) {
+      fetchMatchup();
+    }
+  }, [isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-fetch when generation filter changes
+  useEffect(() => {
+    const currentGens = enabledGenerations.join(',');
+    if (isLoaded && prevGensRef.current && prevGensRef.current !== currentGens) {
+      setLoading(true);
+      fetchMatchup();
+    }
+    prevGensRef.current = currentGens;
+  }, [enabledGenerations, isLoaded, fetchMatchup]);
 
   const handleVote = async (winnerId: number, loserId: number) => {
     if (!pokemon) return;
