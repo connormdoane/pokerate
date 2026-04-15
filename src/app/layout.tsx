@@ -23,9 +23,19 @@ export default function RootLayout({
             {children}
           </main>
           <footer className="border-t-4 border-gb-dark bg-gb-darkest py-4 px-4">
-            <p className="font-pixel text-[8px] text-gb-dark text-center">
-              Pokemon data from PokeAPI. Not affiliated with Nintendo or The Pokemon Company.
-            </p>
+            <div className="flex flex-col items-center gap-2">
+              <p className="font-pixel text-[8px] text-gb-dark text-center">
+                Pokemon data from PokeAPI. Not affiliated with Nintendo or The Pokemon Company.
+              </p>
+              <a
+                href="https://github.com/connormdoane/pokerate"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-pixel text-[8px] text-gb-dark hover:text-gb-light transition-colors"
+              >
+                GitHub
+              </a>
+            </div>
           </footer>
         </GenerationFilterProvider>
       </body>
