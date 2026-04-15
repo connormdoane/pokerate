@@ -1,18 +1,41 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
+import { getIdRangesForGenerations, getDefaultEnabledGenerations } from '@/lib/generations';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabase();
 
-    // Get total count of Pokemon
+    // Parse generations from query params (e.g., ?gens=1,2,3)
+    const gensParam = request.nextUrl.searchParams.get('gens');
+    const genIds = gensParam
+      ? gensParam.split(',').map(Number).filter((n) => !isNaN(n) && n >= 1 && n <= 9)
+      : getDefaultEnabledGenerations();
+
+    // Get ID ranges for the enabled generations
+    const ranges = getIdRangesForGenerations(genIds);
+
+    if (ranges.length === 0) {
+      return NextResponse.json(
+        { error: 'No valid generations specified' },
+        { status: 400 }
+      );
+    }
+
+    // Build the OR filter for ID ranges
+    const orConditions = ranges
+      .map((range) => `and(id.gte.${range.start},id.lte.${range.end})`)
+      .join(',');
+
+    // Get total count of Pokemon matching the filter
     const { count, error: countError } = await supabase
       .from('pokemon')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .or(orConditions);
 
-    if (countError || !count) {
+    if (countError || !count || count < 2) {
       return NextResponse.json(
-        { error: 'Failed to fetch Pokemon count' },
+        { error: 'Not enough Pokemon in selected generations' },
         { status: 500 }
       );
     }
@@ -24,16 +47,18 @@ export async function GET() {
       offset2 = Math.floor(Math.random() * count);
     }
 
-    // Fetch two random Pokemon
+    // Fetch two random Pokemon from filtered set
     const [result1, result2] = await Promise.all([
       supabase
         .from('pokemon')
         .select('id, name, sprite_url, elo')
+        .or(orConditions)
         .range(offset1, offset1)
         .single(),
       supabase
         .from('pokemon')
         .select('id, name, sprite_url, elo')
+        .or(orConditions)
         .range(offset2, offset2)
         .single(),
     ]);
