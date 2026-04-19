@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { useGenerationFilterContext } from '@/contexts/GenerationFilterContext';
 
 type RankedPokemon = {
   rank: number;
@@ -29,13 +30,19 @@ export default function LeaderboardTable() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState<'desc' | 'asc'>('desc');
 
+  const { enabledGenerations, isLoaded } = useGenerationFilterContext();
+  const prevGensRef = useRef<string>('');
+
   useEffect(() => {
+    if (!isLoaded) return;
+
     async function fetchLeaderboard() {
       setLoading(true);
       try {
         const offset = page * ITEMS_PER_PAGE;
+        const gensParam = enabledGenerations.join(',');
         const response = await fetch(
-          `/api/leaderboard?limit=${ITEMS_PER_PAGE}&offset=${offset}&order=${order}`
+          `/api/leaderboard?limit=${ITEMS_PER_PAGE}&offset=${offset}&order=${order}&gens=${gensParam}`
         );
         if (response.ok) {
           const json = await response.json();
@@ -49,7 +56,16 @@ export default function LeaderboardTable() {
     }
 
     fetchLeaderboard();
-  }, [page, order]);
+  }, [page, order, isLoaded, enabledGenerations]);
+
+  // Reset to page 0 when filter changes
+  useEffect(() => {
+    const currentGens = enabledGenerations.join(',');
+    if (isLoaded && prevGensRef.current && prevGensRef.current !== currentGens) {
+      setPage(0);
+    }
+    prevGensRef.current = currentGens;
+  }, [enabledGenerations, isLoaded]);
 
   const handleOrderChange = (newOrder: 'desc' | 'asc') => {
     if (newOrder !== order) {
